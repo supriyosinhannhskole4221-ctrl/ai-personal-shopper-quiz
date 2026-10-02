@@ -1,4 +1,5 @@
-// Vercel Express entry point
-// The actual application is implemented in app-supabase.js
+const express = require("express");
 
-require("./app-supabase");
+const app = require("./app-supabase");
+
+module.exports = app;

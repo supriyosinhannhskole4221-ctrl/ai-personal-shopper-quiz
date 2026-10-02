@@ -138,24 +138,30 @@ app.get("*", (_req, res) =>
 );
 
 // ── START ────────────────────────────────────────────────────
-const server = app.listen(PORT, async () => {
-  console.log(`\n  Server →  http://localhost:${PORT}\n`);
-  const s = await getDbStatus();
-  if (s.connected) {
-    console.log(`  ✅  Supabase connected: ${s.url}`);
-    console.log(`      Table: ${s.table}\n`);
-  } else {
-    console.error(`  ❌  Supabase NOT connected: ${s.error}\n`);
-  }
-});
+// Export Express app for Vercel
+module.exports = app;
 
-server.on("error", (err) => {
-  if (err.code === "EADDRINUSE") {
-    console.error(`\n  ❌  Port ${PORT} is already in use!`);
-    console.error(`  Run this to free it, then retry npm start:\n`);
-    console.error(`  Stop-Process -Id (Get-NetTCPConnection -LocalPort ${PORT}).OwningProcess -Force\n`);
-    process.exit(1);
-  } else {
-    throw err;
-  }
-});
+// Start local server only when running directly
+if (require.main === module) {
+  const server = app.listen(PORT, async () => {
+    console.log(`\n  Server →  http://localhost:${PORT}\n`);
+
+    const s = await getDbStatus();
+
+    if (s.connected) {
+      console.log(`  ✅  Supabase connected: ${s.url}`);
+      console.log(`      Table: ${s.table}\n`);
+    } else {
+      console.error(`  ❌  Supabase NOT connected: ${s.error}\n`);
+    }
+  });
+
+  server.on("error", (err) => {
+    if (err.code === "EADDRINUSE") {
+      console.error(`\n  ❌  Port ${PORT} is already in use!\n`);
+      process.exit(1);
+    } else {
+      throw err;
+    }
+  });
+}
